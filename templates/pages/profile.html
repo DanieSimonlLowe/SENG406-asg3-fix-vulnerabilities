@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="auth-wrapper">
+    <div class="auth-content">
+        <div class="auth-bg">
+            <span class="r"></span>
+            <span class="r s"></span>
+            <span class="r s"></span>
+            <span class="r"></span>
+        </div>
+        <div class="card">
+            <div class="d-flex align-items-center justify-content-center flex-column">
+                <div class="pro-head">
+                    {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" alt="profile image"
+                             class="img-radius">
+                    {% else %}
+                        <img src="{% static 'assets/images/user/avatar-1.jpg' %}" alt="profile image"
+                             class="img-radius">
+                    {% endif %}
+                </div>
+                <h2 class="mb-3">{{ user.get_full_name }}</h2>
+                <h5>Username: {{ user.get_username }}</h5>
+                <h5>Email: {{ user.email }}</h5>
+                <a class="btn btn-secondary shadow-2 mb-4 mt-4" href="{% url 'update_profile' %}">Update Profile</a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,34 @@
+{% load static %}
+
+<tr data-assignment-result-id="{{ assignment_result.id }}">
+    <td>
+        <h6 class="m-0"><img class="rounded-circle m-r-10" style="width:40px;"
+                             src="{% static 'assets/images/user/avatar-1.jpg' %}" alt="activity-user">
+            {{ assignment_result.user.first_name }} {{ assignment_result.user.last_name }}
+        </h6>
+    </td>
+    <td>
+        <h6 class="m-0">
+            <a href="{% url 'download_assignment_result_file' assignment.id assignment_result.id %}"
+               target="_blank">{{ assignment_result.file.name }}</a>
+        </h6>
+    </td>
+    <td>
+        <h6 class="m-0">{{ assignment_result.submission_date }}</h6>
+    </td>
+    <td>
+        <h6 class="m-0 text-c-{{ assignment_result.get_status_color }}">
+            {{ assignment_result.get_status }}
+        </h6>
+        <button class="btn btn-primary p-1 mt-2 open-grade-modal" data-assignment-result-id="{{ assignment_result.id }}" data-toggle="modal" data-target="#gradeModal">
+            Grade
+        </button>
+    </td>
+    <td>
+        <h6 class="m-0">{{ assignment_result.grade }}%</h6>
+    </td>
+    <td>
+        <h6 class="m-0">{{ assignment_result.get_letter_grade }}</h6>
+    </td>
+
+</tr>

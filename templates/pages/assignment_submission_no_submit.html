@@ -1,0 +1,16 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{#{% block extrahead %}#}
+{#    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.2/min/dropzone.min.css">#}
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.2/min/dropzone.min.js"></script>#}
+{#{% endblock extrahead %}#}
+
+{% block content %}
+    <h3>{{ assignment.title }}</h3>
+    <h5>Due: {{ assignment.due_date }}</h5>
+    <p>{{ assignment.description }}</p>
+    <div class="text-danger">
+        <p>Submission only available to students</p>
+    </div>
+    <a href="{% url 'assignments' %}">Back to assignments</a>
+{% endblock content %}

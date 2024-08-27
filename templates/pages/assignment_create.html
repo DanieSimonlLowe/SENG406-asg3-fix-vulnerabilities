@@ -1,0 +1,21 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="card">
+        <form method="post" class="card-body text-center">
+            {% csrf_token %}
+            <h3 class="mb-4">Create new assignment</h3>
+            {% if message %}
+                <div class="text-danger">{{ message }}</div>
+            {% endif %}
+            {% for field in form %}
+                <div class="input-group mb-3">
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary shadow-2 mb-4" type="submit">Create</button>
+            <a href="{% url 'assignments' %}" class="btn btn-outline-secondary mb-4">Back to assignments</a>
+        </form>
+    </div>
+{% endblock content %}

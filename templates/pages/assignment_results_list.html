@@ -1,0 +1,237 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="{% static 'assets/js/Chart.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+{% endblock extrahead %}
+
+{% block content %}
+    <div style="display: flex; justify-content: space-between; align-items: center">
+        <h3>{{ assignment.title }}</h3>
+        <h5><a href="{% url 'assignments' %}">
+            <i
+                    class="feather icon-arrow-left m-r-5"></i>
+            Back to assignments</a></h5>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>User</th>
+            <th>Submission</th>
+            <th>Submission Time</th>
+            <th>Status</th>
+            <th>Mark</th>
+            <th>Letter Grade</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for assignment_result in assignment.assignmentresult_set.all %}
+            <tr data-assignment-result-id="{{ assignment_result.id }}">
+                <td>
+                    <h6 class="m-0"><img class="rounded-circle m-r-10" style="width:40px;"
+                                         src="{% static 'assets/images/user/avatar-1.jpg' %}" alt="activity-user">
+                        {{ assignment_result.user.first_name }} {{ assignment_result.user.last_name }}
+                    </h6>
+                </td>
+                <td>
+                    <h6 class="m-0">
+                        <a href="{% url 'download_assignment_result_file' assignment.id assignment_result.id %}"
+                           target="_blank">{{ assignment_result.file.name }}</a>
+                    </h6>
+                </td>
+                <td>
+                    <h6 class="m-0">{{ assignment_result.submission_date }}</h6>
+                </td>
+                <td>
+                    <h6 class="m-0 text-c-{{ assignment_result.get_status_color }}">
+                        {{ assignment_result.get_status }}
+                    </h6>
+                    <button class="btn btn-primary p-1 mt-2 open-grade-modal" data-assignment-result-id="{{ assignment_result.id }}" data-toggle="modal" data-target="#gradeModal" data-user-name="{{ assignment_result.user.get_full_name }}">
+                        Grade
+                    </button>
+                </td>
+                <td>
+                    <h6 class="m-0">{{ assignment_result.grade }}%</h6>
+                </td>
+                <td>
+                    <h6 class="m-0">{{ assignment_result.get_letter_grade }}</h6>
+                </td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- The Modal -->
+    <div class="modal fade" id="gradeModal" tabindex="-1" aria-labelledby="gradeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gradeModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <form id="gradeForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="assignment_result_id" id="assignmentResultIdInput">
+                        <div class="form-group">
+                            <label for="gradeInput">Grade</label>
+                            <input type="number" class="form-control" id="gradeInput" name="grade" step="0.01" min="0" max="100" required>
+                            <div id="gradeError" class="text-danger"></div>
+                        </div>
+                    </form>
+                </div>
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitGrade">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div style="height: 500px; max-height: 500px">
+        <canvas id="gradeChart" width="500" height="500"></canvas>
+    </div>
+    <script>
+    // Lil bit of ChatGPT
+    $(document).ready(function(){
+        var assignmentResultId;
+
+        // handle open modal
+        $('.open-grade-modal').on('click', function() {
+            var userName = $(this).data('user-name');
+            $('#gradeModalLabel').text('Enter Grade for ' + userName);
+            assignmentResultId = $(this).data('assignment-result-id');
+            $('#gradeForm input[name="assignment_result_id"]').val(assignmentResultId);
+            $('#gradeInput').val('');
+            $('#gradeError').text('');
+        });
+
+        // Handle form submission
+        $('#submitGrade').click(function(){
+            var grade = $('#gradeInput').val();
+            var regex = /^\d+(\.\d{1,2})?$/; // 2 decimal place check
+            if(grade !== "" && !isNaN(grade) && grade >= 0 && grade <= 100 && regex.test(grade)){
+                var formData = $('#gradeForm').serialize();
+
+                $.ajax({
+                    url: '{% url "assignments_grade" %}',
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if(response.success) {
+                            var row = $('tr[data-assignment-result-id="' + assignmentResultId + '"]');
+                            row.replaceWith(response.row_html);
+
+                            $('#gradeModal').modal('hide');
+                            $('#gradeInput').val('');
+                            $('#gradeError').text(''); 
+                        } else {
+                            $('#gradeError').text('Failed to submit grade.');
+                        }
+                    },
+                    error: function() {
+                        $('#gradeError').text('Failed to submit grade.');
+                    }
+                });
+            } else {
+                $('#gradeError').text('Please enter a valid grade between 0 and 100.');
+            }
+        });
+    });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('gradeChart').getContext('2d');
+            var assignmentData = {{ data|safe }}
+            console.log(assignmentData)
+
+            var letterGrades = {
+                'A+': 0, 'A': 0, 'A-': 0,
+                'B+': 0, 'B': 0, 'B-': 0,
+                'C+': 0, 'C': 0, 'C-': 0,
+                'D': 0, 'E': 0
+            };
+
+            assignmentData.forEach(function (item) {
+                var grade = item.grade;
+                if (grade >= 90) {
+                    letterGrades['A+']++;
+                } else if (grade >= 85) {
+                    letterGrades['A']++;
+                } else if (grade >= 80) {
+                    letterGrades['A-']++;
+                } else if (grade >= 75) {
+                    letterGrades['B+']++;
+                } else if (grade >= 70) {
+                    letterGrades['B']++;
+                } else if (grade >= 65) {
+                    letterGrades['B-']++;
+                } else if (grade >= 60) {
+                    letterGrades['C+']++;
+                } else if (grade >= 55) {
+                    letterGrades['C']++;
+                } else if (grade >= 50) {
+                    letterGrades['C-']++;
+                } else if (grade >= 40) {
+                    letterGrades['D']++;
+                } else {
+                    letterGrades['E']++;
+                }
+            });
+
+            // Prepare data for Chart.js
+            var labels = Object.keys(letterGrades);
+            var data = Object.values(letterGrades);
+
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                responsive: false,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Grade Distribution',
+                        data: data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Count',
+                                fontStyle: 'bold',
+                                fontSize: '16'
+                            }
+                        }],
+                        xAxes:[{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Grade',
+                                fontStyle: 'bold',
+                                fontSize: '16'
+                            },
+                         }]
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock content %}

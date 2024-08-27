@@ -1,0 +1,39 @@
+{#{% load i18n static admin_datta %}#}
+
+<nav class="pcoded-navbar">
+    <div class="navbar-wrapper">
+        <div class="navbar-brand header-logo">
+            <a href="{% url 'index' %}" class="b-brand">
+                <div class="b-bg">
+                    <i class="feather icon-trending-up"></i>
+                </div>
+                <span class="b-title">GradeBoard</span>
+            </a>
+            <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
+        </div>
+        <div class="navbar-content scroll-div">
+            <ul class="nav pcoded-inner-navbar">
+                <li class="nav-item pcoded-menu-caption">
+                    <label>Navigation</label>
+                </li>
+                <li class="nav-item {% if '/accounts/profile/' == request.path %}active{% endif %}">
+                    <a href="{% url 'view_profile' %}" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-user"></i></span><span class="pcoded-mtext">View Profile</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if '/assignments/' == request.path %}active{% endif %}">
+                    <a href="{% url 'assignments' %}" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-clipboard"></i></span><span
+                            class="pcoded-mtext">Assignments</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if '/morale/' == request.path %}active{% endif %}">
+                    <a href="{% url 'morale' %}" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-aperture"></i></span><span
+                            class="pcoded-mtext">Morale Booster</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

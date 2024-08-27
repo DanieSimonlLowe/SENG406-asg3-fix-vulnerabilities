@@ -1,0 +1,34 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div style="display: flex; justify-content: space-between; align-items: center">
+        <h3>Assignments</h3>
+        <h5>
+        <a href="{% url 'assignment_create' %}">
+            <i class="feather icon-plus m-r-5"></i>
+            Create new assignment</a>
+            </h5>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Assignment</th>
+            <th>Due date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for assignment in assignments %}
+            <tr>
+                <td><h6 class="m-0"><a href="{% url 'assignment_results' assignment.id %}">
+                    {{ assignment.title }}
+                </a></h6></td>
+                <td>{{ assignment.due_date }}</td>
+                <td>Coming soon...</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

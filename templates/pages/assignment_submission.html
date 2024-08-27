@@ -1,0 +1,16 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+    <h3>{{ assignment.title }}</h3>
+    <h5>Due: {{ assignment.due_date }}</h5>
+
+    <p>{{ assignment.description }}</p>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary shadow-2 mb-4">Submit assignment</button>
+        <a href="{% url 'assignments' %}" class="btn btn-outline-secondary mb-4">Back to assignments</a>
+    </form>
+{% endblock content %}

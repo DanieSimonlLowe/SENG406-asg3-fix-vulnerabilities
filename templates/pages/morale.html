@@ -1,0 +1,31 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="card p-2 shadow-2">
+        <h1>Morale Booster</h1>
+        <form method="post" class="mb-3">
+            {% csrf_token %}
+            <input class="form-control" name="api_url" id="api_url" value="https://api.thecatapi.com/v1/images/search" disabled>
+            {{ api_url }}
+        </form>
+        <img id="catImage" alt="A cute cat" style="max-width: 100%; height: auto;">
+    </div>
+    <script>
+        const apiKey = 'live_tXqJHbWpDcN0jMX7Ybh1xmEtXrszdb2WwYipnFc7yeFdEOwlAcsUC1MYVVs7WxZG';
+        const apiUrl =  document.getElementById("api_url").value + `?api_key=${apiKey}`;
+
+        function getCatImage() {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const imageUrl = data[0].url;
+                    document.getElementById('catImage').src = imageUrl;
+                })
+                .catch(error => {
+                    console.error('Error fetching the cat image:', error);
+                });
+        }
+        getCatImage();
+    </script>
+{% endblock content %}
