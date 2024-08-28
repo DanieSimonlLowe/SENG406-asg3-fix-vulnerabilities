@@ -20,10 +20,6 @@ class RegistrationForm(UserCreationForm):
     last_name = forms.CharField(
             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'})
     )
-    is_teacher = forms.IntegerField(
-        initial=0,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'style': 'display: none;'})
-    )
     password1 = forms.CharField(
             label=_("Password"),
             widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),

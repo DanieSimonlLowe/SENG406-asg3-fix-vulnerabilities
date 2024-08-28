@@ -35,7 +35,7 @@ def register_user(request):
         form = RegistrationForm(request.POST)
         if user_does_not_exist(form) and form.is_valid():
             user = form.save(commit=False)
-            user.is_teacher = form.cleaned_data['is_teacher']
+            user.is_teacher = False
             user.save()
             login(request, user)
             return redirect("/")
