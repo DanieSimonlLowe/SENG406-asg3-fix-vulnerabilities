@@ -49,7 +49,6 @@ def register_user(request):
 def login_user(request):
     message = None
     if request.method == "POST":
-        logger.info("Attempting to login in user '{0}' with password '{1}'".format(request.POST['username'], request.POST['password']))
         form = LoginForm(data=request.POST)
         if form.is_valid():
             user = authenticate(
