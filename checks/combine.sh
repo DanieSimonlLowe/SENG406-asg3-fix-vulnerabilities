@@ -20,5 +20,7 @@ for file in "$SOURCE_DIR"/*.sh; do
     fi
 done
 
+
+
 echo "All .sh files from $SOURCE_DIR have been combined into $COMBINED_FILE"
 
