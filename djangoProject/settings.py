@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import inspect
 import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -33,7 +34,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'home.apps.HomeConfig'
+    'home.apps.HomeConfig',
+    'axes'
 ]
 
 MIDDLEWARE = [
@@ -44,6 +46,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'axes.middleware.AxesMiddleware',
+
 ]
 
 ROOT_URLCONF = 'djangoProject.urls'
@@ -102,8 +106,11 @@ PASSWORD_HASHERS = [
     'home.hashers.PasswordHasher',
 ]
 
+#'django.contrib.auth.backends.ModelBackend'
 AUTHENTICATION_BACKENDS = [
     'home.auth_backends.CustomBackend',
+    'axes.backends.AxesBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 # Internationalization
@@ -164,3 +171,10 @@ LOGGING = {
         }
     }
 }
+
+
+# Axes settings
+AXES_FAILURE_LIMIT = 10
+AXES_COOLDOWN_LIMIT = timedelta(minutes=10)
+AXES_LOCKOUT_PARAMETERS = ["ip_address", ["username", "user_agent"]]
+AXES_LOCKOUT_TEMPLATE = 'templates/pages/lockout.html'

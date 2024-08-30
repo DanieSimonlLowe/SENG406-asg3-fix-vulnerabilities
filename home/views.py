@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 
+
 from django.http import Http404, FileResponse, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.dateparse import parse_datetime
@@ -52,7 +53,9 @@ def login_user(request):
         logger.info("Attempting to login in user '{0}' with password '{1}'".format(request.POST['username'], request.POST['password']))
         form = LoginForm(data=request.POST)
         if form.is_valid():
+            logger.info('running auth')
             user = authenticate(
+                request=request,
                 username=form.cleaned_data['username'],
                 password=form.cleaned_data['password'],
             )
