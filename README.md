@@ -2,8 +2,6 @@
 
 set up the pre-commit checks
 ```bash
-`chmod a+rx checks/TemplateInjectionDetect.sh
-chmod a+rx .git/hooks/pre-commit
-ln -s $(pwd)/checks/TemplateInjectionDetect.sh .git/hooks/pre-commit`
+`/bin/bash /csse/users/dlo54/Desktop/seng406/seng406-asg3-24/checks/combine.sh`
 ```
 
