@@ -51,6 +51,9 @@ class CustomUserAdmin(UserAdmin):
         form.request = request
         return form
 
+    fieldsets = UserAdmin.fieldsets + (
+        (None, {'fields': ('is_teacher',)}),
+    )
 
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
