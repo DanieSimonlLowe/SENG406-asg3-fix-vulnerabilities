@@ -35,7 +35,7 @@
                     <img src="{% static 'assets/images/user/avatar-1.jpg' %}" alt="profile image"
                      class="img-radius">
                 {% endif %}
-              <span>{{ user.get_full_name | safe }}</span>
+              <span>{{ user.get_full_name }}</span>
             </div>
           <div class="pro-body">
                 <form action="{% url 'logout_user' %}" method="post">
