@@ -21,4 +21,3 @@ urlpatterns = [
     path('morale/', views.morale, name='morale'),
 ]
 
-urlpatterns += static(SETTINGS.MEDIA_URL, document_root=SETTINGS.MEDIA_ROOT)
