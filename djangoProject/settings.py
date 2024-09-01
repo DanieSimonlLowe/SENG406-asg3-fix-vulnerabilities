@@ -137,6 +137,9 @@ LOGIN_REDIRECT_URL = '/'
 # Use custom user object
 AUTH_USER_MODEL = "home.User"
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 LOGGING = {
     "version": 1,  # the dictConfig format version
     "disable_existing_loggers": False,  # retain the default loggers
