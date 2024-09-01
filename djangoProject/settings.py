@@ -149,7 +149,7 @@ LOGGING = {
     "handlers": {
         "main": {
             "class": "logging.FileHandler",
-            "filename": "media" + os.sep + "assignments" + os.sep + "all.log",
+            "filename": "logs" + os.sep + "debug.log",
             "formatter": "simple"
         }
     },
