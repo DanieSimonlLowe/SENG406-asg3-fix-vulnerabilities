@@ -6,13 +6,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from djangoProject import settings
 
 
-class ReuseExistingFileStorage(FileSystemStorage):
-    def save(self, name, content, max_length=None):
-        if self.exists(name):
-            return name
-        return super().save(name, content, max_length)
-
-
 class User(AbstractUser):
     profile_image = models.FileField(upload_to="profile_images", blank=True, null=True)
     is_teacher = models.BooleanField(default=False)
@@ -34,7 +27,7 @@ class AssignmentResult(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     submission_date = models.DateTimeField()
-    file = models.FileField(upload_to="assignments", blank=True, null=True, storage=ReuseExistingFileStorage())
+    file = models.FileField(upload_to="assignments", null=True)
     grade = models.FloatField(default=0, validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
 
     def __str__(self):
