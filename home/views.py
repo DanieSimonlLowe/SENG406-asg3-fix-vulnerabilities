@@ -174,11 +174,14 @@ def assignment_results_list(request, assignment_id):
 def download_assignment_file(request, assignment_id, assignment_result_id):
     logger.info("Downloading assignment")
     assignment = get_object_or_404(AssignmentResult, pk=assignment_result_id)
-    file_path = assignment.file.path
-    try:
-        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=assignment.file.name)
-    except FileNotFoundError:
-        raise Http404("File not found")
+    if (request.user.id == assignment.user.id) or request.user.is_teacher:
+        file_path = assignment.file.path
+        try:
+            return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=assignment.file.name)
+        except FileNotFoundError:
+            raise Http404("File not found")
+    else:
+        return HttpResponseForbidden('<h1>403 Forbidden</h1>')
 
 
 @login_required(login_url='/accounts/login_user')
