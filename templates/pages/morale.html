@@ -12,11 +12,19 @@
         <img id="catImage" alt="A cute cat" style="max-width: 100%; height: auto;">
     </div>
     <script>
-        const apiKey = 'live_tXqJHbWpDcN0jMX7Ybh1xmEtXrszdb2WwYipnFc7yeFdEOwlAcsUC1MYVVs7WxZG';
-        const apiUrl =  document.getElementById("api_url").value + `?api_key=${apiKey}`;
+        const apiUrl =  document.getElementById("api_url").value;
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
         function getCatImage() {
-            fetch(apiUrl)
+            fetch("{% url 'morale' %}", {
+                method: "POST",
+                headers: {
+                'Content-Type':'application/json',
+                'X-CSRFToken':csrftoken
+                }, 
+                body: JSON.stringify({'api_url':apiUrl}) 
+                
+            })
                 .then(response => response.json())
                 .then(data => {
                     const imageUrl = data[0].url;

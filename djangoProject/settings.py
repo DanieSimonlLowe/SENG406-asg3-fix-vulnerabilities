@@ -12,11 +12,16 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import inspect
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = '1234567890abcdefg!'
+
+CAT_API_KEY = os.getenv("CAT_API_KEY", "")
 
 DEBUG = True
 

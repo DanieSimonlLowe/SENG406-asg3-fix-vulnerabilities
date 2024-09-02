@@ -1,5 +1,6 @@
 import logging
 import urllib.request
+import json
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import password_validation
@@ -15,6 +16,8 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.http import Http404, FileResponse, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.dateparse import parse_datetime
+
+from djangoProject import settings
 
 from home.forms import LoginForm, RegistrationForm, AssignmentFileForm, CreateAssignmentForm, UpdateUserProfileForm, \
     GradeAssignmentForm, UpdatePasswordForm
@@ -265,14 +268,18 @@ def assignments_grade(request):
 
 @login_required(login_url='/accounts/login_user')
 def morale(request):
-    logger.info("Boosting morale")
     if request.method == "GET":
+        logger.info("Boosting morale")
         return render(request, "pages/morale.html")
     else:
+        logger.info("Fetching morale")
+        data = request.body
+        data = data.decode('utf-8')
+        data = json.loads(data)
         try:
-            with urllib.request.urlopen(request.POST['api_url']) as f:
+            with urllib.request.urlopen(data['api_url'] + '?api_key=' + settings.CAT_API_KEY) as f:
                 file_content = f.read().decode()
                 return HttpResponse(file_content)
         except Exception:
-            logger.exception("Can't load " + request.POST['api_url'])
+            logger.exception("Can't load " + data['api_url'])
             return render(request, "pages/morale.html")
