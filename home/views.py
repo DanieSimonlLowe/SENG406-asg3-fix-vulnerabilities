@@ -26,7 +26,6 @@ from home.models import User, Assignment, AssignmentResult, AssignmentResultView
 logger = logging.getLogger(__name__)
 
 
-@login_required(login_url='/accounts/login_user')
 def index(request):
     return redirect("/assignments/")
 
@@ -81,7 +80,6 @@ def user_does_not_exist(form):
     return result == 0
 
 
-@login_required(login_url='/accounts/login_user')
 def assignments(request):
     logger.info("Getting assignments")
     if request.user.is_teacher:
@@ -106,7 +104,8 @@ def assignments(request):
                     instance = AssignmentResultView(**row_dict)
                     assignment_results.append(instance)
             ids_to_remove = [x.assignment_id for x in assignment_results if x.assignment_result_id != -1]
-            assignment_results = [x for x in assignment_results if x.assignment_id not in ids_to_remove or (x.assignment_id in ids_to_remove and x.assignment_result_id != -1)]
+            assignment_results = [x for x in assignment_results if x.assignment_id not in ids_to_remove or (
+                        x.assignment_id in ids_to_remove and x.assignment_result_id != -1)]
         else:
             submissions = AssignmentResultView.objects.filter(Q(user_id=request.user.id))
             excluded_ids = [x.assignment_id for x in submissions]
@@ -115,17 +114,16 @@ def assignments(request):
 
         print(assignment_results)
         return render(request, 'pages/assignment_results_student.html',
-                      context={'assignments': assignment_results, 'current_user': request.user, "search_query": search_term })
+                      context={'assignments': assignment_results, 'current_user': request.user,
+                               "search_query": search_term})
 
 
-@login_required(login_url='/accounts/login_user')
 def view_profile(request):
     logger.info("Viewing profile")
     user_profile = User.objects.get(username=request.user.username)
     return render(request, 'pages/profile.html', context={'user': user_profile})
 
 
-@login_required(login_url='/accounts/login_user')
 def update_profile(request):
     logger.info("Attempting to update profile")
     if request.method == "POST":
@@ -138,7 +136,6 @@ def update_profile(request):
     return render(request, 'pages/update_profile.html', context={'form': form})
 
 
-@login_required(login_url='/accounts/login_user')
 def update_password(request):
     logger.info("Attempting to update password")
     message = None
@@ -173,7 +170,6 @@ def assignment_results_list(request, assignment_id):
         return HttpResponseForbidden('<h1>403 Forbidden</h1>')
 
 
-@login_required(login_url='/accounts/login_user')
 def download_assignment_file(request, assignment_id, assignment_result_id):
     logger.info("Downloading assignment")
     assignment = get_object_or_404(AssignmentResult, pk=assignment_result_id)
@@ -187,7 +183,6 @@ def download_assignment_file(request, assignment_id, assignment_result_id):
         return HttpResponseForbidden('<h1>403 Forbidden</h1>')
 
 
-@login_required(login_url='/accounts/login_user')
 def assignment_submission(request, assignment_id):
     logger.info("Submitting assignment")
     assignment = get_object_or_404(Assignment, pk=assignment_id)
@@ -213,7 +208,6 @@ def assignment_submission(request, assignment_id):
         return render(request, 'pages/assignment_submission_no_submit.html', context={"assignment": assignment})
 
 
-@login_required(login_url='/accounts/login_user')
 def assignment_create(request):
     logger.info("Creating assignment")
     if request.user.is_teacher:
@@ -234,14 +228,12 @@ def assignment_create(request):
         return HttpResponseForbidden('<h1>403 Forbidden</h1>')
 
 
-@login_required(login_url='/accounts/login_user')
 def logout_user(request):
     logger.info("Logging out")
     logout(request)
     return redirect("/accounts/login_user")
 
 
-@login_required(login_url='/accounts/login_user')
 def assignments_grade(request):
     logger.info("Grading assignments")
     if request.user.is_teacher:
@@ -266,7 +258,6 @@ def assignments_grade(request):
         return HttpResponseForbidden('<h1>403 Forbidden</h1>')
 
 
-@login_required(login_url='/accounts/login_user')
 def morale(request):
     if request.method == "GET":
         logger.info("Boosting morale")
