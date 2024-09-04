@@ -23,7 +23,7 @@ SECRET_KEY = '1234567890abcdefg!'
 
 CAT_API_KEY = os.getenv("CAT_API_KEY", "")
 
-DEBUG = True
+DEBUG = False
 
 SESSION_COOKIE_AGE = 89793238462
 
