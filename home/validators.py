@@ -8,10 +8,8 @@ class UniquePasswordValidator:
     def validate(self, password, user=None):
         hashed_password = PasswordHasher().encode(password)
         if User.objects.filter(password=hashed_password).exists():
-            matching_users = User.objects.filter(password=hashed_password)
-            usernames = ', '.join([u.username for u in matching_users])
             raise ValidationError(
-                _("This password has already been used by the following user(s): %s") % usernames,
+                _("This password is already used by another user."),
                 code='password_used',
             )
 
