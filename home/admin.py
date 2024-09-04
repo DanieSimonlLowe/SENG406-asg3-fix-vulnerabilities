@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 from django import forms
+from django.contrib.auth.models import Permission
 
 from home.models import User, Assignment, AssignmentResult
 
@@ -9,6 +10,13 @@ from home.models import User, Assignment, AssignmentResult
 admin.site.register(User)
 admin.site.register(Assignment)
 admin.site.register(AssignmentResult)
+
+
+def get_permissions(user):
+    individual_permissions = set(user.user_permissions.all())
+    group_permissions = set(Permission.objects.filter(group__user=user))
+    all_permissions = individual_permissions.union(group_permissions)
+    return all_permissions
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -19,13 +27,13 @@ class CustomUserChangeForm(UserChangeForm):
 
         if self.instance.pk:
             admin_user = self.request.user
-            admin_permissions = set(admin_user.get_all_permissions())
+            admin_permissions = get_permissions(admin_user)
 
             if not admin_user.is_superuser:
                 if not user_permissions.issubset(admin_permissions) or is_superuser:
                     raise forms.ValidationError("You can only assign permissions that you have.")
 
-                original_permissions = set(self.instance.get_all_permissions())
+                original_permissions = get_permissions(self.instance)
                 if not original_permissions.issubset(admin_permissions) or self.instance.is_superuser:
                     raise forms.ValidationError("You can only modify users with a subset of your permissions.")
 
@@ -41,8 +49,8 @@ class CustomUserAdmin(UserAdmin):
         admin_user = request.user
         if admin_user.is_superuser:
             return True
-        admin_permissions = set(admin_user.get_all_permissions())
-        user_permissions = set(obj.get_all_permissions())
+        admin_permissions = get_permissions(admin_user)
+        user_permissions = get_permissions(obj)
 
         return user_permissions.issubset(admin_permissions)
 
@@ -54,6 +62,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('is_teacher',)}),
     )
+
 
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
