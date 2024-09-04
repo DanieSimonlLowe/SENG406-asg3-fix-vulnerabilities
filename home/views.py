@@ -141,19 +141,25 @@ def update_password(request):
     message = None
     form = UpdatePasswordForm(request.POST, instance=request.user)
     if form.is_valid():
-        try:
-            password_validation.validate_password(form.cleaned_data['password'])
-            if form.cleaned_data['password'] == form.cleaned_data['confirm_password']:
-                user = form.save(commit=False)
-                user.password = make_password(form.cleaned_data['password'])
-                user.save()
-                update_session_auth_hash(request, user)
-                return redirect('view_profile')
-            else:
-                form.add_error('confirm_password', 'Passwords do not match')
-        except ValidationError as e:
-            form.add_error('password', e)
-
+        user = authenticate(
+            username=request.user.username,
+            password=form.cleaned_data['current_password'],
+        )
+        if user is not None:
+            try:
+                password_validation.validate_password(form.cleaned_data['password'])
+                if form.cleaned_data['password'] == form.cleaned_data['confirm_password']:
+                    user = form.save(commit=False)
+                    user.password = make_password(form.cleaned_data['password'])
+                    user.save()
+                    update_session_auth_hash(request, user)
+                    return redirect('view_profile')
+                else:
+                    form.add_error('confirm_password', 'Passwords do not match')
+            except ValidationError as e:
+                form.add_error('password', e)
+        else:
+            form.add_error('current_password', 'Current password is incorrect')
     else:
         message = 'Error(s) in form'
     return render(request, 'pages/update_password.html', context={'form': form, 'message': message})
