@@ -39,9 +39,12 @@ def register_user(request):
             user = form.save(commit=False)
             user.is_teacher = False
             user.save()
+
+            logger.info("Successfully registered new user: " + user.username)
             login(request, user)
             return redirect("/")
         else:
+            logger.error("Registration form is invalid")
             message = "Error(s) in form"
     else:
         form = RegistrationForm()
@@ -58,11 +61,14 @@ def login_user(request):
                 password=form.cleaned_data['password'],
             )
             if user is not None:
+                logger.info("Successfully authenticated user: " + user.username)
                 login(request, user)
                 return redirect('/')
             else:
+                logger.error("Failed to authenticate user: + " + form.cleaned_data['username'])
                 message = "Login failed: Username or password incorrect"
         else:
+            logger.error("Login form is invalid")
             message = "Error(s) in form"
 
     else:
@@ -84,6 +90,7 @@ def assignments(request):
     logger.info("Getting assignments")
     if request.user.is_teacher:
         assignment_list = Assignment.objects.all()
+        logger.info("Retrieved assignment list for teacher")
         return render(request, 'pages/assignment_list_teacher.html', context={'assignments': assignment_list})
     else:
         search_term = request.GET.get('search', '')
@@ -93,6 +100,7 @@ def assignments(request):
                 FROM assignment_result_view
                 WHERE title LIKE '%{search_term.strip()}%' AND (user_id = {request.user.id} OR user_id = -1)
                 """
+                logger.info(f"Executing query: {query}")
                 cursor.execute(query)
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
@@ -112,7 +120,7 @@ def assignments(request):
             others = AssignmentResultView.objects.filter(~Q(assignment_id__in=excluded_ids) & Q(user_id=-1))
             assignment_results = submissions.union(others)
 
-        print(assignment_results)
+        logger.info(f"Retrieved assignment results: {assignment_results}")
         return render(request, 'pages/assignment_results_student.html',
                       context={'assignments': assignment_results, 'current_user': request.user,
                                "search_query": search_term})
@@ -130,7 +138,10 @@ def update_profile(request):
         form = UpdateUserProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
+            logger.info("Profile updated successfully")
             return redirect("view_profile")
+        else:
+            logger.error("Update profile form is invalid")
     else:
         form = UpdateUserProfileForm(instance=request.user)
     return render(request, 'pages/update_profile.html', context={'form': form})
@@ -153,44 +164,54 @@ def update_password(request):
                     user.password = make_password(form.cleaned_data['password'])
                     user.save()
                     update_session_auth_hash(request, user)
+
+                    logger.info("Successfully updated password for user: " + user.username)
                     return redirect('view_profile')
                 else:
                     form.add_error('confirm_password', 'Passwords do not match')
+                    logger.error("Passwords do not match")
             except ValidationError as e:
                 form.add_error('password', e)
+                logger.error("Invalid new password")
         else:
             form.add_error('current_password', 'Current password is incorrect')
+            logger.error("Incorrect current password")
     else:
+        logger.error("Update password form is invalid")
         message = 'Error(s) in form'
     return render(request, 'pages/update_password.html', context={'form': form, 'message': message})
 
 
 def assignment_results_list(request, assignment_id):
     if getattr(request.user, 'is_teacher', True):
-        logger.info("Getting assignment results list")
+        logger.info("Getting results list for assignment id: " + str(assignment_id))
         assignment_results = get_object_or_404(Assignment, pk=assignment_id)
         data = list(assignment_results.assignmentresult_set.all().values('grade'))
         return render(request, 'pages/assignment_results_list.html',
                       context={'assignment': assignment_results, 'data': data})
     else:
+        logger.warning("Unauthorized access to assignment results list")
         return HttpResponseForbidden('<h1>403 Forbidden</h1>')
 
 
 def download_assignment_file(request, assignment_id, assignment_result_id):
-    logger.info("Downloading assignment")
+    logger.info("Downloading assignment id:" + str(assignment_id))
     assignment = get_object_or_404(AssignmentResult, pk=assignment_result_id)
     if (request.user.id == assignment.user.id) or request.user.is_teacher:
         file_path = assignment.file.path
         try:
+            logger.info(f"Opening file for download: {file_path}")
             return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=assignment.file.name)
         except FileNotFoundError:
+            logger.error("File not found")
             raise Http404("File not found")
     else:
+        logger.warning("Unauthorized attempt to download assignment file")
         return HttpResponseForbidden('<h1>403 Forbidden</h1>')
 
 
 def assignment_submission(request, assignment_id):
-    logger.info("Submitting assignment")
+    logger.info("Submitting assignment id:" + str(assignment_id))
     assignment = get_object_or_404(Assignment, pk=assignment_id)
     if not request.user.is_teacher:
         message = None
@@ -202,15 +223,18 @@ def assignment_submission(request, assignment_id):
                 assignment_result.user = request.user
                 assignment_result.submission_date = timezone.now()
                 assignment_result.save()
+
+                logger.info(f"Successfully submitted assignment id: {assignment_id}")
                 return redirect(reverse('assignments'))
             else:
+                logger.error("Assignment submission form is invalid")
                 message = "Invalid submission"
         else:
             form = AssignmentFileForm()
-
         return render(request, 'pages/assignment_submission.html',
                       context={'form': form, 'assignment': assignment, "message": message})
     else:
+        logger.warning("Unauthorized attempted to submit assignment")
         return render(request, 'pages/assignment_submission_no_submit.html', context={"assignment": assignment})
 
 
@@ -224,13 +248,16 @@ def assignment_create(request):
                 created_assignment = form.save(commit=False)
                 # any other values that need to be saved?
                 created_assignment.save()
+                logger.info("Successfully created assignment")
                 return redirect(reverse('assignments'))
             else:
+                logger.error("Assignment creation form is invalid")
                 message = "Error(s) in form"
         else:
             form = CreateAssignmentForm()
         return render(request, 'pages/assignment_create.html', context={'form': form, 'message': message})
     else:
+        logger.warning("Unauthorized attempt to create assignment")
         return HttpResponseForbidden('<h1>403 Forbidden</h1>')
 
 
@@ -254,13 +281,16 @@ def assignments_grade(request):
                     assignment_result.save()
                     context = {'assignment_result': assignment_result, 'assignment': assignment_result.assignment}
                     row_html = render_to_string('partials/assignment_result_row.html', context, request=request)
+                    logger.info(f"Successfully graded assignment result: {assignment_result_id}")
                     return JsonResponse({'success': True, 'row_html': row_html})
                 except Exception as e:
                     print(f"Error in submit_grade: {e}")
                     return JsonResponse({'success': False, 'error': str(e)}, status=500)
         else:
+            logger.error("Invalid request method")
             return JsonResponse({'success': False})
     else:
+        logger.warning("Unauthorized attempt to grade assignments")
         return HttpResponseForbidden('<h1>403 Forbidden</h1>')
 
 
