@@ -98,10 +98,10 @@ def assignments(request):
             with connection.cursor() as cursor:
                 query = f"""SELECT *
                 FROM assignment_result_view
-                WHERE title LIKE '%{search_term.strip()}%' AND (user_id = {request.user.id} OR user_id = -1)
+                WHERE title LIKE %s AND (user_id = %s OR user_id = -1)
                 """
                 logger.info(f"Executing query: {query}")
-                cursor.execute(query)
+                cursor.execute(query, [f'%{search_term.strip()}%', request.user.id])
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
                 assignment_results = []
