@@ -6,3 +6,15 @@ set up the pre-commit checks
 chmod a+rx '.git/hooks/pre-commit'
 ```
 
+# Build static files
+Static files must be built before running the server. The following command builds all static files.
+
+```bash
+python manage.py collectstatic
+```
+
+# Run the server 
+To run the server use the following command.
+```bash
+python manage.py runserver
+```
