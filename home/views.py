@@ -41,8 +41,8 @@ def register_user(request):
             user.save()
 
             logger.info("Successfully registered new user: " + user.username)
-            login(request, user)
-            return redirect("/")
+            #login(request, user)
+            return redirect("/accounts/login_user/?next=/")
         else:
             logger.error("Registration form is invalid")
             message = "Error(s) in form"
